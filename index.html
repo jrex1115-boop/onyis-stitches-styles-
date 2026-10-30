@@ -223,7 +223,7 @@ let list=products.filter(p=>
 $('products').innerHTML=list.length?list.map(p=>`
 <article class="card">
 ${p.image_urls?.[0]
-?`<img src="${safe(p.image_urls[0])}" alt="${safe(p.name)}">`
+?`<img src="${safe(p.image_urls[0])}" alt="${safe(p.name)}" onclick="window.open(this.src,'_blank')" style="cursor:zoom-in">`
 :'<div style="height:310px;display:grid;place-items:center;background:#f8f4ec;font-size:65px">🧵</div>'}
 <div class="pad">
 <div class="muted">${safe(p.category||'')}</div>
