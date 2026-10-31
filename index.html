@@ -18,7 +18,102 @@ button{cursor:pointer}
 header{padding:14px 6%;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fffffff2;backdrop-filter:blur(10px);z-index:5}
 .brand{font-size:19px;font-weight:bold}
 .brand small{display:block;color:var(--gold);font:700 10px Arial,sans-serif;letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
-.hero{min-height:570px;display:flex;align-items:center;padding:65px 8%;color:white;background:linear-gradient(90deg,#15120fc9,#15120f4d,#15120f08),url('https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=2000&q=85') center 35%/cover no-repeat}
+.hero{
+position:relative;
+min-height:620px;
+display:flex;
+align-items:center;
+padding:65px 8%;
+color:white;
+overflow:hidden;
+background:#123c30;
+}
+
+.hero-slides,.hero-shade{
+position:absolute;
+inset:0;
+}
+
+.hero-slide{
+position:absolute;
+inset:0;
+background-position:center;
+background-size:cover;
+opacity:0;
+transition:opacity 1s ease;
+}
+
+.hero-slide.active{opacity:1}
+
+.hero-shade{
+background:linear-gradient(90deg,#101b15dd,#101b1570,#101b1510);
+z-index:1;
+}
+
+.hero-content{
+position:relative;
+z-index:2;
+max-width:650px;
+}
+
+.hero .eyebrow{color:#e4bd83}
+
+.hero h1{
+font-size:clamp(44px,7vw,78px);
+font-weight:400;
+line-height:1.02;
+margin:20px 0;
+}
+
+.hero p{
+font:15px/1.9 Arial,sans-serif;
+max-width:490px;
+color:#f4eee7;
+margin-bottom:28px;
+}
+
+.hero-arrow{
+position:absolute;
+z-index:3;
+top:50%;
+transform:translateY(-50%);
+background:#123c30cc;
+color:#fff;
+border:1px solid #d6b47a;
+border-radius:50%;
+width:42px;
+height:42px;
+font-size:28px;
+}
+
+.hero-arrow.prev{left:18px}
+.hero-arrow.next{right:18px}
+
+.hero-dots{
+position:absolute;
+z-index:3;
+bottom:22px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:10px;
+}
+
+.hero-dots button{
+width:10px;
+height:10px;
+border-radius:50%;
+border:1px solid white;
+background:transparent;
+padding:0;
+}
+
+.hero-dots button.active{background:#d6b47a}
+
+@media(max-width:600px){
+.hero{min-height:500px;padding:55px 12%}
+.hero-arrow{width:34px;height:34px}
+}
 .hero div{max-width:650px}
 .eyebrow,.kicker{font:700 10px Arial,sans-serif;letter-spacing:.25em;text-transform:uppercase;color:var(--gold)}
 .hero .eyebrow{color:#e7c99b}
@@ -70,15 +165,42 @@ header{padding:12px 4%}
 </div>
 </header>
 
-<section class="hero">
-<div>
-<div class="eyebrow">Thoughtfully made · Beautifully worn</div>
-<h1>Elegance in<br>Every Stitch.</h1>
-<p>Discover timeless ready-to-wear pieces, beautifully tailored outfits and thoughtful finishing touches, made to celebrate your style.</p>
-<a class="btn gold" href="#shop">Explore the collection</a>
-</div>
-</section>
+<section class="hero hero-slideshow" id="home">
 
+  <div class="hero-slides">
+    <div class="hero-slide active"
+      style="background-image:url('https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=2000&q=85')">
+    </div>
+
+    <div class="hero-slide" data-product-slide="0"></div>
+
+    <div class="hero-slide"
+      style="background-image:url('https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=2000&q=85')">
+    </div>
+
+    <div class="hero-slide" data-product-slide="1"></div>
+  </div>
+
+  <div class="hero-shade"></div>
+
+  <div class="hero-content">
+    <div class="eyebrow">AFRICAN LUXURY · TIMELESS ELEGANCE</div>
+    <h1>Wear Your<br>Heritage Beautifully.</h1>
+    <p>Discover African elegance, beautifully tailored for the modern woman.</p>
+    <a class="btn gold" href="#shop">Explore the Collection</a>
+  </div>
+
+  <button class="hero-arrow prev" onclick="changeHeroSlide(-1)">‹</button>
+  <button class="hero-arrow next" onclick="changeHeroSlide(1)">›</button>
+
+  <div class="hero-dots">
+    <button class="active" onclick="goHeroSlide(0)"></button>
+    <button onclick="goHeroSlide(1)"></button>
+    <button onclick="goHeroSlide(2)"></button>
+    <button onclick="goHeroSlide(3)"></button>
+  </div>
+
+</section>
 <main id="shop" class="wrap">
 <div class="kicker">The collection</div>
 <h2>Find your next favourite look</h2>
@@ -184,7 +306,71 @@ const supabase=createClient(
 const WA='2347061988252';
 const $=id=>document.getElementById(id);
 let products=[];
+let heroIndex=0;
 
+const heroSlides=()=>[...document.querySelectorAll('.hero-slide')];
+const heroDots=()=>[...document.querySelectorAll('.hero-dots button')];
+
+function showHeroSlide(index){
+  const slides=heroSlides();
+  if(!slides.length)return;
+
+  heroIndex=(index+slides.length)%slides.length;
+
+  slides.forEach((slide,i)=>{
+    slide.classList.toggle('active',i===heroIndex);
+  });
+
+  heroDots().forEach((dot,i)=>{
+    dot.classList.toggle('active',i===heroIndex);
+  });
+}
+
+window.changeHeroSlide=direction=>{
+  showHeroSlide(heroIndex+direction);
+};
+
+window.goHeroSlide=index=>{
+  showHeroSlide(index);
+};
+
+function updateHeroProductSlides(){
+  const samples=products.filter(
+    p=>p.image_urls?.[0]
+  );
+
+  document.querySelectorAll('[data-product-slide]')
+    .forEach(slide=>{
+      const index=Number(slide.dataset.productSlide);
+      const product=samples[index];
+
+      if(product){
+        slide.style.backgroundImage=
+          `url(${JSON.stringify(product.image_urls[0])})`;
+      }
+    });
+}
+
+const hero=document.getElementById('home');
+let touchStartX=0;
+
+hero.addEventListener('touchstart',event=>{
+  touchStartX=event.changedTouches[0].screenX;
+},{passive:true});
+
+hero.addEventListener('touchend',event=>{
+  const difference=
+    event.changedTouches[0].screenX-touchStartX;
+
+  if(Math.abs(difference)>50){
+    window.changeHeroSlide(difference<0?1:-1);
+  }
+},{passive:true});
+
+showHeroSlide(0);
+setInterval(()=>{
+  showHeroSlide(heroIndex+1);
+},5000);
 $('year').textContent=new Date().getFullYear();
 
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({
@@ -206,6 +392,7 @@ return;
 }
 
 products=data||[];
+  updateHeroProductSlides();
 render();
 
 $('loadStatus').textContent=products.length
